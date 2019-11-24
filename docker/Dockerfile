@@ -1,4 +1,4 @@
-FROM arteniioleg/ide:cpp
+FROM 01e9/ide:cpp
 
 RUN apt-get update \
     && apt-get install -y \

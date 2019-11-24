@@ -10,9 +10,9 @@ CMD=${@}
 [ -n "${CMD}" ] \
     || { echo "Command is required"; exit 1; }
 
-IMAGE=snake-game-opengl:1.0
+IMAGE=snake-game-opengl:2.0
 
-[ -n "$(docker images -q --filter=reference="${IMAGE}")" ] \
+[ -n "$(docker images -q --filter reference="${IMAGE}")" ] \
     || docker build -t ${IMAGE} ${SCRIPT_DIR}
 
 x11docker \
@@ -20,9 +20,7 @@ x11docker \
     --hostdisplay \
     --homedir ${HOME} \
     --clipboard \
-    --stdout --stderr \
     --cap-default \
-    --workdir ${PROJECT_DIR} \
     -- "--cap-add=SYS_PTRACE" \
     ${IMAGE} \
     ${CMD}
