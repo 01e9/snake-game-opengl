@@ -1,6 +1,6 @@
 # Snake Game [Download](https://github.com/arteniioleg/snake-game-opengl/releases)
 
-![gif](https://static.md/5e5b6d1fe1162905dc2a13710d74a420.gif)
+https://youtu.be/-5x51jU4bFw
 
 ### Build
 
