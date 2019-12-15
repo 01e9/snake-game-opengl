@@ -4,10 +4,10 @@ https://youtu.be/-5x51jU4bFw
 
 ### Build
 
-1. Open IDE in docker by executing
+1. Open IDE in docker using [this project](https://github.com/01e9/docker-ide)
 
     ```bash
-    ./docker/ide.sh ~/path/to/ide.sh
+    .../docker-ide/ide cpp-gpu ~/.../path/to/ide.sh -x11docker "--gpu"
     ```
 
     Check `x11docker` output about video driver install.
