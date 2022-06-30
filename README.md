@@ -4,17 +4,9 @@ https://youtu.be/-5x51jU4bFw
 
 ### Build
 
-1. Open IDE in docker using [this project](https://github.com/01e9/docker-ide)
-
-    ```bash
-    .../docker-ide/ide cpp-gpu ~/.../path/to/ide.sh -x11docker "--gpu"
-    ```
-
-    Check `x11docker` output about video driver install.
-
-2. Build target `external_all`
-3. Reload CMake
-4. Build target `snake_game_opengl`
+1. Build target `external_all`
+2. Reload CMake
+3. Build target `snake_game_opengl`
 
 ##### P.S.
 
