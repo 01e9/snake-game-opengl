@@ -4,6 +4,7 @@
 #include <util/ShaderProgram.h>
 #include <gsl/pointers>
 #include <glm/glm.hpp>
+#include <optional>
 
 namespace app::object {
 

@@ -8,6 +8,7 @@
 #include <util/ShaderProgram.h>
 #include <glm/vec2.hpp>
 #include <vector>
+#include <optional>
 
 namespace app::object {
 
