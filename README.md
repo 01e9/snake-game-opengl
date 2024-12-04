@@ -14,7 +14,7 @@ https://youtu.be/-5x51jU4bFw
 so you can run IDE in a docker container and keep your system clean of dev libs.
 
 ```shell
-env DOCKER_IMAGE='01e9/ide-in-docker:cpp-gpu' X11DOCKER_OPTS='--gpu' ~/.../ide-in-docker ~/.../your-ide
+env DOCKER_IMAGE='01e9/ide-in-docker:cpp' X11DOCKER_OPTS='--gpu' ~/.../ide-in-docker ~/.../your-ide
 ```
 
 _Tested with CLion IDE (if it crashes on project open - disable the Markdown plugin)._
