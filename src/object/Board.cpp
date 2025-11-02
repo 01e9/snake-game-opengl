@@ -1,7 +1,7 @@
 #include "Board.h"
 #include <glad/glad.h>
 #include <stdexcept>
-#include <gsl/gsl_util>
+#include <gsl/util>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

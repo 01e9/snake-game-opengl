@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <stdexcept>
-#include <gsl/gsl_util>
+#include <gsl/util>
 #include <limits>
 #include <util/Cube.h>
 #include <algorithm>

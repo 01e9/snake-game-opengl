@@ -1,7 +1,7 @@
 #include "ShaderProgram.h"
 #include <glad/glad.h>
 #include <stdexcept>
-#include <gsl/gsl_util>
+#include <gsl/util>
 
 namespace app::util {
 
