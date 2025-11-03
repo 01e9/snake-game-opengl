@@ -11,7 +11,7 @@ namespace app::object {
 class Board : public IObject {
 public:
     Board();
-    ~Board();
+    ~Board() noexcept;
 
     void setCamera(const glm::mat4 &view) override;
     void setProjection(const glm::mat4 &projection) override;

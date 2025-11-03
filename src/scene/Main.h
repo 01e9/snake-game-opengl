@@ -10,7 +10,7 @@ namespace app::scene {
 class Main : public IScene {
 public:
     Main();
-    ~Main() = default;
+    ~Main() noexcept = default;
 
     void add(gsl::not_null<IObject *> object) override;
     void remove(gsl::not_null<IObject *> object) override;

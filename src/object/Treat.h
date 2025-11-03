@@ -13,7 +13,7 @@ class Board;
 class Treat : public IObject {
 public:
     explicit Treat(gsl::not_null<Board*> board);
-    ~Treat();
+    ~Treat() noexcept;
 
     void setCamera(const glm::mat4 &view) override;
     void setProjection(const glm::mat4 &projection) override;

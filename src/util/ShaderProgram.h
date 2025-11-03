@@ -9,7 +9,7 @@ namespace app::util {
 class ShaderProgram {
 public:
     explicit ShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource);
-    ~ShaderProgram();
+    ~ShaderProgram() noexcept;
 
     inline unsigned int id() const {
         return mId;
