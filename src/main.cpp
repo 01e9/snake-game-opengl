@@ -2,142 +2,138 @@
 #include <GLFW/glfw3.h>
 #include <gsl/gsl>
 #include <stdexcept>
+#include <interface/IObject.h>
 #include <scene/Main.h>
 #include <object/Treat.h>
 #include <object/Snake.h>
 #include <object/Board.h>
+#include <atomic>
+#include <array>
 #include <thread>
-#include <mutex>
-
-using KeyCallbackData = std::tuple<std::set<int>&, bool&, std::mutex&, app::scene::Main&>;
+#include <boost/thread/synchronized_value.hpp>
 
 int main()
 {
-    glfwInit();
-    const auto autoTerminateGLFW = gsl::finally([](){ glfwTerminate(); });
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    GLFWwindow* window {[] {
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    const auto videoMode {glfwGetVideoMode(glfwGetPrimaryMonitor())};
-    if (videoMode == NULL) {
-        throw std::runtime_error{"Failed to get GLFW video mode"};
-    }
+        const auto videoMode {glfwGetVideoMode(glfwGetPrimaryMonitor())};
+        if (videoMode == nullptr) {
+            throw std::runtime_error{"Failed to get GLFW video mode"};
+        }
 
-    auto window {glfwCreateWindow(
-        gsl::narrow_cast<int>(videoMode->width / 1.6),
-        gsl::narrow_cast<int>(videoMode->height / 1.6),
-        "Snake Game OpenGL", NULL, NULL
-    )};
-    if (window == NULL) {
-        throw std::runtime_error{"Failed to create GLFW window"};
-    }
+        auto window {glfwCreateWindow(
+            gsl::narrow_cast<int>(videoMode->width / 1.6),
+            gsl::narrow_cast<int>(videoMode->height / 1.6),
+            "Snake Game OpenGL", nullptr, nullptr
+        )};
+        if (window == nullptr) {
+            throw std::runtime_error{"Failed to create GLFW window"};
+        }
 
-    glfwMakeContextCurrent(window);
-    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-        throw std::runtime_error{"Failed to initialize GLAD"};
-    }
+        glfwMakeContextCurrent(window);
+        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+            throw std::runtime_error{"Failed to initialize GLAD"};
+        }
 
-    glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
+        std::srand(std::time(nullptr));
 
-    std::srand(std::time(nullptr));
+        return window;
+    }()};
+    const auto _cleanupGLFW = gsl::finally(glfwTerminate);
 
-    app::scene::Main mainScene{};
+    auto [ scene, _objects /* keep pointers alive */ ] = []{
+        app::scene::Main scene{};
 
-    app::object::Board boardObject{};
-    mainScene.add(&boardObject);
+        auto board{std::make_unique<app::object::Board>()};
+        scene.add(board.get());
 
-    app::object::Treat treatObject{&boardObject};
-    mainScene.add(&treatObject);
+        auto treat{std::make_unique<app::object::Treat>(board.get())};
+        scene.add(treat.get());
 
-    app::object::Snake snakeObject{&boardObject, &treatObject};
-    mainScene.add(&snakeObject);
+        auto snake{std::make_unique<app::object::Snake>(board.get(), treat.get())};
+        scene.add(snake.get());
 
-    std::mutex sceneUpdateMutex;
-    bool stop {false};
+        return std::make_tuple(
+            boost::synchronized_value{std::move(scene)},
+            std::array<std::unique_ptr<app::IObject>, 3>{
+                std::move(board),
+                std::move(treat),
+                std::move(snake)
+            }
+        );
+    }();
 
-    //region Render thread
+    std::atomic stop {false};
+    std::set<int> pressedKeys {};
 
     glfwMakeContextCurrent(nullptr);
-    std::thread renderingThread {[&window, &mainScene, &stop, &sceneUpdateMutex](){
+    std::jthread renderingThread {[&window, &scene, &stop]{
         glfwMakeContextCurrent(window);
 
         constexpr std::chrono::milliseconds frameInterval {std::milli::den/30};
 
-        while (!stop) {
+        while (!stop.load(std::memory_order_relaxed)) {
             auto beginTime {std::chrono::system_clock::now()};
 
-            {
-                std::lock_guard lock{sceneUpdateMutex};
-                mainScene.render();
-            }
+            scene.unique_synchronize()->render();
+
             glfwSwapBuffers(window);
 
-            auto sleepDuration {
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    frameInterval - (std::chrono::system_clock::now() - beginTime)
-                )
-            };
-            if (sleepDuration.count() > 0) {
+            if (
+                auto sleepDuration {
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                        frameInterval - (std::chrono::system_clock::now() - beginTime)
+                    )
+                };
+                sleepDuration.count() > 0
+            ) {
                 std::this_thread::sleep_for(sleepDuration);
             }
         }
 
         glfwSetWindowShouldClose(window, true);
     }};
-    auto autoJoinRenderingThread = gsl::finally([&renderingThread](){
-        if (renderingThread.joinable()) {
-            renderingThread.join();
-        }
-    });
 
-    //endregion
-
-    std::set<int> pressedKeys {};
-
-    //region Tick thread
-
-    std::thread tickThread {[&mainScene, &stop, &sceneUpdateMutex, &pressedKeys](){
+    std::jthread tickThread {[&scene, &stop, &pressedKeys]{
         constexpr std::chrono::milliseconds tickInterval {std::milli::den/100};
 
-        while (!stop) {
+        while (!stop.load(std::memory_order_relaxed)) {
             auto beginTime {std::chrono::system_clock::now()};
 
-            {
-                std::lock_guard lock{sceneUpdateMutex};
-                mainScene.tick(pressedKeys);
-            }
+            scene.unique_synchronize()->tick(pressedKeys);
 
-            auto sleepDuration {
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    tickInterval - (std::chrono::system_clock::now() - beginTime)
-                )
-            };
-            if (sleepDuration.count() > 0) {
+            if (
+                auto sleepDuration {
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                        tickInterval - (std::chrono::system_clock::now() - beginTime)
+                    )
+                };
+                sleepDuration.count() > 0
+            ) {
                 std::this_thread::sleep_for(sleepDuration);
             }
         }
     }};
-    auto autoJoinTickThread = gsl::finally([&tickThread](){
-        if (tickThread.joinable()) {
-            tickThread.join();
-        }
-    });
-
-    //endregion
 
     //region Key callback
 
-    KeyCallbackData keyCalbackData{pressedKeys, stop, sceneUpdateMutex, mainScene};
+    using KeyCallbackData = std::tuple<decltype(pressedKeys)&, decltype(stop)&, decltype(scene)&>;
+
+    KeyCallbackData keyCalbackData{pressedKeys, stop, scene};
     glfwSetWindowUserPointer(window, &keyCalbackData);
     glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int, int action, int) {
-        gsl::not_null<KeyCallbackData*> data {reinterpret_cast<KeyCallbackData*>(glfwGetWindowUserPointer(window))};
+        gsl::not_null data {reinterpret_cast<KeyCallbackData*>(glfwGetWindowUserPointer(window))};
 
-        auto& [ pressedKeys, stop, sceneUpdateMutex, mainScene ] = *data;
+        auto& [ pressedKeys, stop, scene ] = *data;
 
         do {
-            std::lock_guard lock{sceneUpdateMutex};
+            auto sceneLock = scene.unique_synchronize();
 
             if (GLFW_PRESS == action) {
                 pressedKeys.insert(key);
@@ -147,11 +143,11 @@ int main()
                 break;
             }
 
-            mainScene.tick(pressedKeys);
+            sceneLock->tick(pressedKeys);
         } while (false);
 
         if (GLFW_KEY_ESCAPE == key && action == GLFW_PRESS) {
-            stop = true;
+            stop.store(true, std::memory_order_relaxed);
         }
     });
 
