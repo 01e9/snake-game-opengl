@@ -13,6 +13,9 @@ class Board;
 class Treat : public IObject {
 public:
     explicit Treat(gsl::not_null<Board*> board);
+
+    Treat(Treat &&other) noexcept = default;
+    Treat & operator=(Treat &&other) noexcept = default;
     ~Treat() noexcept;
 
     IObject& setCamera(const glm::mat4 &view) override;

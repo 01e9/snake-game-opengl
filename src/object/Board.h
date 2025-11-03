@@ -11,6 +11,9 @@ namespace app::object {
 class Board : public IObject {
 public:
     Board();
+
+    Board(Board &&other) noexcept = default;
+    Board & operator=(Board &&other) noexcept = default;
     ~Board() noexcept;
 
     IObject& setCamera(const glm::mat4 &view) override;

@@ -9,6 +9,9 @@ namespace app::util {
 class ShaderProgram {
 public:
     explicit ShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource);
+
+    ShaderProgram(ShaderProgram &&other) noexcept = default;
+    ShaderProgram & operator=(ShaderProgram &&other) noexcept = default;
     ~ShaderProgram() noexcept;
 
     inline unsigned int id() const {

@@ -18,6 +18,9 @@ class Treat;
 class Snake : public IObject {
 public:
     explicit Snake(gsl::not_null<Board*> board, gsl::not_null<Treat*> treat);
+
+    Snake(Snake &&other) noexcept = default;
+    Snake & operator=(Snake &&other) noexcept = default;
     ~Snake() noexcept;
 
     IObject& setCamera(const glm::mat4 &view) override;
