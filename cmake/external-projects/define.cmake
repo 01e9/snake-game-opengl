@@ -49,3 +49,13 @@ ExternalProject_Add(external_gsl
 )
 set_target_properties(external_gsl PROPERTIES EXCLUDE_FROM_ALL TRUE)
 add_dependencies(external_all external_gsl)
+
+ExternalProject_Add(external_glad
+	# Generated on https://glad.dav1d.de + custom CMakeLists.txt
+	URL "file://${EXTERNAL_PROJECTS_SOURCES_DIR}/glad.tar.gz"
+	PREFIX ${EXTERNAL_PROJECTS_DIR}
+	CMAKE_ARGS
+	-DCMAKE_INSTALL_PREFIX=${EXTERNAL_PROJECTS_INSTALL_DIR}
+)
+set_target_properties(external_glad PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_dependencies(external_all external_glad)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.0)
 
-project(snake_game_opengl)
+project(snake_game_opengl LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -12,7 +12,6 @@ endif()
 include(cmake/external-projects/require.cmake)
 
 add_executable(${PROJECT_NAME}
-    glad/src/glad.c
     src/object/Board.cpp
     src/object/Snake.cpp
     src/object/Treat.cpp
@@ -28,11 +27,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 target_include_directories(${PROJECT_NAME}
     PRIVATE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
-    PRIVATE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/glad/include>
     PRIVATE $<BUILD_INTERFACE:${EXTERNAL_PROJECTS_INSTALL_DIR}/${CMAKE_INSTALL_INCLUDEDIR}>
 )
 if (WIN32)
-    target_link_libraries(${PROJECT_NAME} opengl32 glfw3)
+    target_link_libraries(${PROJECT_NAME} PRIVATE glad opengl32 glfw3)
 else()
-    target_link_libraries(${PROJECT_NAME} GL glfw3 dl pthread X11 Xrandr Xinerama Xcursor Xxf86vm)
+    target_link_libraries(${PROJECT_NAME} PRIVATE glad GL glfw3 dl pthread X11 Xrandr Xinerama Xcursor Xxf86vm)
 endif()
