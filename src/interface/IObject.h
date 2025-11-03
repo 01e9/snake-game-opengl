@@ -10,8 +10,8 @@ namespace app {
 struct IObject {
     virtual ~IObject() noexcept = default;
 
-    virtual void setCamera(const glm::mat4& view) = 0;
-    virtual void setProjection(const glm::mat4& projection) = 0;
+    virtual IObject& setCamera(const glm::mat4& view) = 0;
+    virtual IObject& setProjection(const glm::mat4& projection) = 0;
     virtual void render() = 0;
     virtual void tick(const std::set<int>& pressedKeys) {};
 };

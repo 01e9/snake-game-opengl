@@ -47,17 +47,16 @@ int main()
     }()};
     const auto _cleanupGLFW = gsl::finally(glfwTerminate);
 
-    auto [ scene, _objects /* keep pointers alive */ ] = []{
-        app::scene::Main scene{};
-
+    auto [ scene, _objects /* to keep pointers alive */ ] = []{
         auto board{std::make_unique<app::object::Board>()};
-        scene.add(board.get());
-
         auto treat{std::make_unique<app::object::Treat>(board.get())};
-        scene.add(treat.get());
-
         auto snake{std::make_unique<app::object::Snake>(board.get(), treat.get())};
-        scene.add(snake.get());
+
+        app::scene::Main scene{};
+        scene
+            .add(board.get())
+            .add(treat.get())
+            .add(snake.get());
 
         return std::make_tuple(
             boost::synchronized_value{std::move(scene)},
@@ -82,7 +81,6 @@ int main()
             auto beginTime {std::chrono::system_clock::now()};
 
             scene.unique_synchronize()->render();
-
             glfwSwapBuffers(window);
 
             if (

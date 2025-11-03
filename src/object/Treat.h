@@ -15,8 +15,8 @@ public:
     explicit Treat(gsl::not_null<Board*> board);
     ~Treat() noexcept;
 
-    void setCamera(const glm::mat4 &view) override;
-    void setProjection(const glm::mat4 &projection) override;
+    IObject& setCamera(const glm::mat4 &view) override;
+    IObject& setProjection(const glm::mat4 &projection) override;
     void render() override;
     const glm::uvec2& position() const;
     const glm::uvec2& randomizePosition();

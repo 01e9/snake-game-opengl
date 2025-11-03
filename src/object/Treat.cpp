@@ -16,7 +16,7 @@ Treat::Treat(gsl::not_null<Board*> board)
     setPosition(2, 2);
 }
 
-Treat::~Treat() {
+Treat::~Treat() noexcept {
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &mVao);
     glDeleteBuffers(1, &mVbo);
@@ -27,12 +27,16 @@ Treat::~Treat() {
 
 //region Public Methods
 
-void Treat::setCamera(const glm::mat4 &view) {
+IObject& Treat::setCamera(const glm::mat4 &view) {
     mPendingCameraUpdate = view;
+
+    return *this;
 }
 
-void Treat::setProjection(const glm::mat4 &projection) {
+IObject& Treat::setProjection(const glm::mat4 &projection) {
     mPendingProjectionUpdate = projection;
+
+    return *this;
 }
 
 void Treat::render() {

@@ -16,15 +16,19 @@ Main::Main()
 
 //endregion
 
-void Main::add(gsl::not_null<IObject *> object) {
+IScene& Main::add(gsl::not_null<IObject *> object) {
     object->setCamera(mCamera);
     object->setProjection(mProjection);
 
     mObjects.insert(object.get());
+
+    return *this;
 }
 
-void Main::remove(gsl::not_null<IObject *> object) {
+IScene& Main::remove(gsl::not_null<IObject *> object) {
     mObjects.erase(object.get());
+
+    return *this;
 }
 
 void Main::tick(const std::set<int> &pressedKeys) {

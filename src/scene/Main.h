@@ -12,8 +12,8 @@ public:
     Main();
     ~Main() noexcept = default;
 
-    void add(gsl::not_null<IObject *> object) override;
-    void remove(gsl::not_null<IObject *> object) override;
+    IScene& add(gsl::not_null<IObject *> object) override;
+    IScene& remove(gsl::not_null<IObject *> object) override;
     void render() override;
     void tick(const std::set<int>& pressedKeys) override;
 

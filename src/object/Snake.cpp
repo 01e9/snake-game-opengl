@@ -34,7 +34,7 @@ Snake::Snake(gsl::not_null<Board *> board, gsl::not_null<Treat *> treat)
     createVao();
 }
 
-Snake::~Snake() {
+Snake::~Snake() noexcept {
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &mVao);
     glDeleteBuffers(1, &mVbo);
@@ -76,12 +76,16 @@ void Snake::render() {
     glUseProgram(0);
 }
 
-void Snake::setCamera(const glm::mat4 &view) {
+IObject& Snake::setCamera(const glm::mat4 &view) {
     mPendingCameraUpdate = view;
+
+    return *this;
 }
 
-void Snake::setProjection(const glm::mat4 &projection) {
+IObject& Snake::setProjection(const glm::mat4 &projection) {
     mPendingProjectionUpdate = projection;
+
+    return *this;
 }
 
 //endregion

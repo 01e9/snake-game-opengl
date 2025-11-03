@@ -13,8 +13,8 @@ public:
     Board();
     ~Board() noexcept;
 
-    void setCamera(const glm::mat4 &view) override;
-    void setProjection(const glm::mat4 &projection) override;
+    IObject& setCamera(const glm::mat4 &view) override;
+    IObject& setProjection(const glm::mat4 &projection) override;
     void render() override;
 
     inline size_t size() const {

@@ -19,7 +19,7 @@ Board::Board()
     createVao();
 }
 
-Board::~Board() {
+Board::~Board() noexcept {
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &mVao);
     glDeleteFramebuffers(1, &mVbo);
@@ -48,12 +48,16 @@ void Board::render() {
     glUseProgram(0);
 }
 
-void Board::setCamera(const glm::mat4 &view) {
+IObject& Board::setCamera(const glm::mat4 &view) {
     mPendingCameraUpdate = view;
+
+    return *this;
 }
 
-void Board::setProjection(const glm::mat4 &projection) {
+IObject& Board::setProjection(const glm::mat4 &projection) {
     mPendingProjectionUpdate = projection;
+
+    return *this;
 }
 
 //endregion

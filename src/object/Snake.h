@@ -20,8 +20,8 @@ public:
     explicit Snake(gsl::not_null<Board*> board, gsl::not_null<Treat*> treat);
     ~Snake() noexcept;
 
-    void setCamera(const glm::mat4 &view) override;
-    void setProjection(const glm::mat4 &projection) override;
+    IObject& setCamera(const glm::mat4 &view) override;
+    IObject& setProjection(const glm::mat4 &projection) override;
     void render() override;
 
     void tick(const std::set<int> &pressedKeys) override;
