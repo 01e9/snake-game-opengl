@@ -15,7 +15,7 @@ add_custom_target(external_all)
 set_target_properties(external_all PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 ExternalProject_Add(external_glfw
-	#URL https://github.com/glfw/glfw/archive/3.4.tar.gz
+	#URL https://github.com/glfw/glfw/archive/3.3.10.tar.gz
 	URL "file://${EXTERNAL_PROJECTS_SOURCES_DIR}/glfw.tar.gz"
 	PREFIX ${EXTERNAL_PROJECTS_DIR}
 	CMAKE_ARGS
