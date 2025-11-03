@@ -29,8 +29,10 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
     PRIVATE $<BUILD_INTERFACE:${EXTERNAL_PROJECTS_INSTALL_DIR}/${CMAKE_INSTALL_INCLUDEDIR}>
 )
+
+set(COMMON_LIBS glad glfw3 Boost::thread)
 if (WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE glad opengl32 glfw3)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${COMMON_LIBS} opengl32)
 else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE glad GL glfw3 dl pthread X11 Xrandr Xinerama Xcursor Xxf86vm)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${COMMON_LIBS} GL dl pthread X11 Xrandr Xinerama Xcursor Xxf86vm)
 endif()

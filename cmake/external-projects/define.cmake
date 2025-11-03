@@ -1,8 +1,8 @@
 include(ExternalProject)
 
-#include(ProcessorCount)
-#ProcessorCount(CPU_COUNT)
-#MATH(EXPR CPU_COUNT "${CPU_COUNT}-2")
+include(ProcessorCount)
+ProcessorCount(CPU_COUNT)
+MATH(EXPR CPU_COUNT "${CPU_COUNT}-2")
 
 set(EXTERNAL_PROJECTS_SOURCES_DIR "${CMAKE_CURRENT_LIST_DIR}/sources")
 
@@ -59,3 +59,14 @@ ExternalProject_Add(external_glad
 )
 set_target_properties(external_glad PROPERTIES EXCLUDE_FROM_ALL TRUE)
 add_dependencies(external_all external_glad)
+
+ExternalProject_Add(external_boost
+	URL https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.gz
+	PREFIX ${EXTERNAL_PROJECTS_DIR}
+	CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=thread --prefix=${EXTERNAL_PROJECTS_INSTALL_DIR}
+	BUILD_COMMAND ./b2 -j${CPU_COUNT} link=static install
+	BUILD_IN_SOURCE 1
+	INSTALL_COMMAND ""
+)
+set_target_properties(external_boost PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_dependencies(external_all external_boost)
