@@ -9,6 +9,7 @@
 #include <object/Board.h>
 #include <array>
 #include <thread>
+#include <functional>
 #include <boost/thread/synchronized_value.hpp>
 
 struct SharedData {
@@ -62,60 +63,63 @@ int main()
         auto snake{std::make_unique<app::object::Snake>(board.get(), treat.get())};
 
         auto sharedData{std::make_unique<SharedData>(window)};
-        sharedData->scene.add(board.get()).add(treat.get()).add(snake.get());
+        sharedData->scene
+            .add(board.get()).add(treat.get()).add(snake.get());
 
         return std::make_tuple(
             boost::synchronized_value{std::move(sharedData)},
-            std::array<std::unique_ptr<app::IObject>, 3>{ std::move(board), std::move(treat), std::move(snake) }
+            std::array<std::unique_ptr<app::IObject>, 3>{
+                std::move(board), std::move(treat), std::move(snake)
+            }
         );
     }();
 
     using SharedDataT = decltype(sharedData);
     glfwSetWindowUserPointer(window, &sharedData);
     glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int, int action, int) {
-        gsl::not_null sharedData {reinterpret_cast<SharedDataT*>(glfwGetWindowUserPointer(window))};
+        std::function<void(std::set<int>& pressedKeys, int key)> keyAction {};
 
-        do {
-            auto d {sharedData->unique_synchronize()};
-
-            if (GLFW_PRESS == action) {
-                (*d)->pressedKeys.insert(key);
-            } else if (GLFW_RELEASE == action) {
-                (*d)->pressedKeys.erase(key);
-            } else {
+        switch (action) {
+            case GLFW_PRESS:
+                if (GLFW_KEY_ESCAPE == key) {
+                    return glfwSetWindowShouldClose(window, true);
+                }
+                keyAction = [](std::set<int>& pressedKeys, int key){ pressedKeys.insert(key); };
                 break;
-            }
+            case GLFW_RELEASE:
+                keyAction = [](std::set<int>& pressedKeys, int key){ pressedKeys.erase(key); };
+                break;
+            default:
+                return;
+        }
 
+        gsl::not_null sharedData {reinterpret_cast<SharedDataT*>(glfwGetWindowUserPointer(window))};
+        {
+            auto d {sharedData->synchronize()};
+
+            keyAction((*d)->pressedKeys, key);
             (*d)->scene.tick((*d)->pressedKeys);
-        } while (false);
-
-        if (GLFW_KEY_ESCAPE == key && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose((*sharedData->unique_synchronize())->window, true);
         }
     });
 
     glfwMakeContextCurrent(nullptr);
     std::jthread renderingThread {[&sharedData](std::stop_token stop_token){
-        glfwMakeContextCurrent((*sharedData.unique_synchronize())->window);
+        glfwMakeContextCurrent((*sharedData.synchronize())->window);
 
         constexpr std::chrono::milliseconds frameInterval {std::milli::den/30};
 
         while (!stop_token.stop_requested()) {
             auto beginTime {std::chrono::system_clock::now()};
 
-            {
-                auto d {sharedData.unique_synchronize()};
-
+            if (auto d {sharedData.try_to_synchronize(/* least important */)}; d.owns_lock()) {
                 (*d)->scene.render();
                 glfwSwapBuffers((*d)->window);
             }
 
             if (
-                auto sleepDuration {
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        frameInterval - (std::chrono::system_clock::now() - beginTime)
-                    )
-                };
+                auto sleepDuration {std::chrono::duration_cast<std::chrono::milliseconds>(
+                    frameInterval - (std::chrono::system_clock::now() - beginTime)
+                )};
                 sleepDuration.count() > 0
             ) {
                 std::this_thread::sleep_for(sleepDuration);
@@ -130,17 +134,15 @@ int main()
             auto beginTime {std::chrono::system_clock::now()};
 
             {
-                auto d {sharedData.unique_synchronize()};
+                auto d {sharedData.synchronize()};
 
                 (*d)->scene.tick((*d)->pressedKeys);
             }
 
             if (
-                auto sleepDuration {
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        tickInterval - (std::chrono::system_clock::now() - beginTime)
-                    )
-                };
+                auto sleepDuration {std::chrono::duration_cast<std::chrono::milliseconds>(
+                    tickInterval - (std::chrono::system_clock::now() - beginTime)
+                )};
                 sleepDuration.count() > 0
             ) {
                 std::this_thread::sleep_for(sleepDuration);
