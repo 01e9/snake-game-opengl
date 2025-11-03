@@ -12,6 +12,11 @@
 #include <thread>
 #include <boost/thread/synchronized_value.hpp>
 
+struct ThreadsSharedData {
+    app::scene::Main scene {};
+    std::set<int> pressedKeys {};
+};
+
 int main()
 {
     GLFWwindow* window {[] {
@@ -47,19 +52,19 @@ int main()
     }()};
     const auto _cleanupGLFW = gsl::finally(glfwTerminate);
 
-    auto [ scene, _objects /* to keep pointers alive */ ] = []{
+    auto [ sharedData, _objects /* to keep pointers alive */ ] = []{
         auto board{std::make_unique<app::object::Board>()};
         auto treat{std::make_unique<app::object::Treat>(board.get())};
         auto snake{std::make_unique<app::object::Snake>(board.get(), treat.get())};
 
-        app::scene::Main scene{};
-        scene
+        ThreadsSharedData sharedData{};
+        sharedData.scene
             .add(board.get())
             .add(treat.get())
             .add(snake.get());
 
         return std::make_tuple(
-            boost::synchronized_value{std::move(scene)},
+            boost::synchronized_value{std::move(sharedData)},
             std::array<std::unique_ptr<app::IObject>, 3>{
                 std::move(board),
                 std::move(treat),
@@ -69,10 +74,9 @@ int main()
     }();
 
     std::atomic stop {false};
-    std::set<int> pressedKeys {};
 
     glfwMakeContextCurrent(nullptr);
-    std::jthread renderingThread {[&window, &scene, &stop]{
+    std::jthread renderingThread {[&window, &sharedData, &stop]{
         glfwMakeContextCurrent(window);
 
         constexpr std::chrono::milliseconds frameInterval {std::milli::den/30};
@@ -80,7 +84,7 @@ int main()
         while (!stop.load(std::memory_order_relaxed)) {
             auto beginTime {std::chrono::system_clock::now()};
 
-            scene.unique_synchronize()->render();
+            sharedData.unique_synchronize()->scene.render();
             glfwSwapBuffers(window);
 
             if (
@@ -98,13 +102,17 @@ int main()
         glfwSetWindowShouldClose(window, true);
     }};
 
-    std::jthread tickThread {[&scene, &stop, &pressedKeys]{
+    std::jthread tickThread {[&sharedData, &stop]{
         constexpr std::chrono::milliseconds tickInterval {std::milli::den/100};
 
         while (!stop.load(std::memory_order_relaxed)) {
             auto beginTime {std::chrono::system_clock::now()};
 
-            scene.unique_synchronize()->tick(pressedKeys);
+            {
+                auto dataLock {sharedData.unique_synchronize()};
+
+                dataLock->scene.tick(dataLock->pressedKeys);
+            }
 
             if (
                 auto sleepDuration {
@@ -121,27 +129,27 @@ int main()
 
     //region Key callback
 
-    using KeyCallbackData = std::tuple<decltype(pressedKeys)&, decltype(stop)&, decltype(scene)&>;
+    using KeyCallbackData = std::tuple<decltype(sharedData)&, decltype(stop)&>;
 
-    KeyCallbackData keyCalbackData{pressedKeys, stop, scene};
+    KeyCallbackData keyCalbackData{sharedData, stop};
     glfwSetWindowUserPointer(window, &keyCalbackData);
     glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int, int action, int) {
         gsl::not_null data {reinterpret_cast<KeyCallbackData*>(glfwGetWindowUserPointer(window))};
 
-        auto& [ pressedKeys, stop, scene ] = *data;
+        auto& [ sharedData, stop ] = *data;
 
         do {
-            auto sceneLock = scene.unique_synchronize();
+            auto dataLock {sharedData.unique_synchronize()};
 
             if (GLFW_PRESS == action) {
-                pressedKeys.insert(key);
+                dataLock->pressedKeys.insert(key);
             } else if (GLFW_RELEASE == action) {
-                pressedKeys.erase(key);
+                dataLock->pressedKeys.erase(key);
             } else {
                 break;
             }
 
-            sceneLock->tick(pressedKeys);
+            dataLock->scene.tick(dataLock->pressedKeys);
         } while (false);
 
         if (GLFW_KEY_ESCAPE == key && action == GLFW_PRESS) {
