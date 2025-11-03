@@ -59,7 +59,7 @@ int main()
 
     //region Render thread
 
-    glfwMakeContextCurrent(0);
+    glfwMakeContextCurrent(nullptr);
     std::thread renderingThread {[&window, &mainScene, &stop, &sceneUpdateMutex](){
         glfwMakeContextCurrent(window);
 
