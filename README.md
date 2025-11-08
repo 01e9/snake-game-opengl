@@ -1,4 +1,4 @@
-# Snake Game in OpenGL
+# Snake Game
 
 * [Preview](https://youtu.be/-5x51jU4bFw) on YouTube
 * [Download](https://github.com/01e9/snake-game-opengl/releases/latest) latest release
