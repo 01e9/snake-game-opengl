@@ -1,4 +1,4 @@
-#include "Board.h"
+#include "Board.hpp"
 #include <glad/glad.h>
 #include <stdexcept>
 #include <gsl/util>

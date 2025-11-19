@@ -2,7 +2,7 @@
 
 #include <gsl/pointers>
 #include <set>
-#include "./common.h"
+#include "./common.hpp"
 
 class GLFWwindow;
 

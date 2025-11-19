@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <set>
-#include "./common.h"
+#include "./common.hpp"
 
 class GLFWwindow;
 

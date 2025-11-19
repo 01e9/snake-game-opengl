@@ -1,4 +1,4 @@
-#include "ShaderProgram.h"
+#include "ShaderProgram.hpp"
 #include <glad/glad.h>
 #include <stdexcept>
 #include <gsl/util>

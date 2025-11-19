@@ -1,6 +1,6 @@
 #pragma once
 
-#include <interface/IScene.h>
+#include <interface/IScene.hpp>
 #include <set>
 #include <glm/glm.hpp>
 #include <chrono>

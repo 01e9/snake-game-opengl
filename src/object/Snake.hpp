@@ -1,11 +1,11 @@
 #pragma once
 
-#include <interface/IObject.h>
+#include <interface/IObject.hpp>
 #include <gsl/pointers>
 #include <array>
 #include <deque>
 #include <chrono>
-#include <util/ShaderProgram.h>
+#include <util/ShaderProgram.hpp>
 #include <glm/vec2.hpp>
 #include <vector>
 #include <optional>

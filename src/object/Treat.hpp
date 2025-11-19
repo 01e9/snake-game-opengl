@@ -1,7 +1,7 @@
 #pragma once
 
-#include <interface/IObject.h>
-#include <util/ShaderProgram.h>
+#include <interface/IObject.hpp>
+#include <util/ShaderProgram.hpp>
 #include <gsl/pointers>
 #include <glm/glm.hpp>
 #include <optional>

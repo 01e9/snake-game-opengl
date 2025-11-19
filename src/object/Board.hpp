@@ -1,10 +1,10 @@
 #pragma once
 
-#include <interface/IObject.h>
+#include <interface/IObject.hpp>
 #include <utility>
 #include <vector>
 #include <optional>
-#include <util/ShaderProgram.h>
+#include <util/ShaderProgram.hpp>
 
 namespace app::object {
 

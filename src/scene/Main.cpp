@@ -1,6 +1,6 @@
-#include "Main.h"
+#include "Main.hpp"
 #include <GLFW/glfw3.h>
-#include <interface/IObject.h>
+#include <interface/IObject.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>

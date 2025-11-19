@@ -1,6 +1,6 @@
-#include "Snake.h"
-#include <object/Board.h>
-#include <object/Treat.h>
+#include "Snake.hpp"
+#include <object/Board.hpp>
+#include <object/Treat.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <gsl/util>
 #include <limits>
-#include <util/Cube.h>
+#include <util/Cube.hpp>
 #include <algorithm>
 
 namespace app::object {

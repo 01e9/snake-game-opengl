@@ -1,6 +1,6 @@
-#include "Treat.h"
-#include <util/Cube.h>
-#include <object/Board.h>
+#include "Treat.hpp"
+#include <util/Cube.hpp>
+#include <object/Board.hpp>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 

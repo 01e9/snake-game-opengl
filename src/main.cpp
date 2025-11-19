@@ -2,11 +2,11 @@
 #include <GLFW/glfw3.h>
 #include <gsl/gsl>
 #include <stdexcept>
-#include <interface/IObject.h>
-#include <scene/Main.h>
-#include <object/Treat.h>
-#include <object/Snake.h>
-#include <object/Board.h>
+#include <interface/IObject.hpp>
+#include <scene/Main.hpp>
+#include <object/Treat.hpp>
+#include <object/Snake.hpp>
+#include <object/Board.hpp>
 #include <array>
 #include <thread>
 #include <functional>
