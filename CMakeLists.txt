@@ -2,14 +2,10 @@ cmake_minimum_required(VERSION 4.0)
 
 project(snake_game_opengl LANGUAGES CXX)
 
-include(GNUInstallDirs)
-
-include("./cmake/external-projects/define.cmake")
-if(NOT EXISTS ${EXTERNAL_PROJECTS_INSTALL_DIR})
-    message(AUTHOR_WARNING "Build the `external_all` target then reload CMake.")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/external-projects/setup.cmake")
+if (NOT EXT_PROJ_READY)
     return()
 endif()
-include("./cmake/external-projects/require.cmake")
 
 add_executable(${PROJECT_NAME}
     src/object/Board.cpp
@@ -27,7 +23,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        $<BUILD_INTERFACE:${EXTERNAL_PROJECTS_INSTALL_DIR}/${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${EXT_PROJ_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
 )
 
