@@ -4,12 +4,12 @@ project(snake_game_opengl LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
-include(cmake/external-projects/define.cmake)
+include("./cmake/external-projects/define.cmake")
 if(NOT EXISTS ${EXTERNAL_PROJECTS_INSTALL_DIR})
     message(AUTHOR_WARNING "Build the `external_all` target then reload CMake.")
     return()
 endif()
-include(cmake/external-projects/require.cmake)
+include("./cmake/external-projects/require.cmake")
 
 add_executable(${PROJECT_NAME}
     src/object/Board.cpp
